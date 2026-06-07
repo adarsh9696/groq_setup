@@ -1,4 +1,5 @@
 import os
+import time
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -6,42 +7,50 @@ load_dotenv()
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-role = input("enter role for the template : ")
+file = open('C:/Users/adars/Documents/ai_module/sample_text.txt')
+content = file.read()
+file.close()
 
-audience = input("enter audience for the template : ")
-
-template = """You are a {role} explaining things to a {audience}.
-
-Here are some examples of how you should respond:
-
-User: What is gravity?
-Assistant: Gravity is a fundamental physical interaction that causes all entities with mass or energy to attract one another.  It is the force responsible for keeping planets in orbit, holding atmospheres in place, and giving weight to physical objects on planetary surfaces.
-
-User: What is photosynthesis?
-Assistant: Photosynthesis is the biological process by which green plants, algae, and certain bacteria convert light energy from the sun into chemical energy stored in sugars.  This process primarily occurs in the chloroplasts of plant cells, where the pigment chlorophyll captures sunlight to drive the reaction.
-
-Always follow this exact style and length in your responses."""
-
-filled_template = template.format(role=role, audience=audience)
+content = content.strip()
 
 prompt = 'start'
 
+filled_template = """You are a document assistant. You have ONE job: answer questions using ONLY the document below.
+
+STRICT RULES:
+- If the answer is in the document, answer it using only that information.
+- If the answer is NOT in the document, respond with exactly: "I cannot answer this based on the provided document."
+- Never use your training knowledge. Never answer from memory.
+- No exceptions.
+
+DOCUMENT:
+"""
+
+history = []
+
 while prompt != "quit":
 
-    prompt = input("Enter a topic. To exit enter 'quit': ")
+    prompt = input("Ask a question. To exit enter 'quit': ")
 
     if prompt == 'quit' : 
         break
 
+    if not prompt.strip():
+        continue
+
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": filled_template},
+            {"role": "system", "content": filled_template+content},
+            *history[-6:],
             {"role": "user", "content": prompt}
         ],
         temperature=0.7,
         max_tokens=512,
     )
 
-    
+    history.append({"role": "user", "content": prompt})
+    history.append({"role": "assistant", "content": response.choices[0].message.content})
+
     print(response.choices[0].message.content)
+    time.sleep(2)

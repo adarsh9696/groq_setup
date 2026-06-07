@@ -2,29 +2,28 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 
-load_dotenv()   # reads .env and injects into os.environ
+load_dotenv()
 
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY")
-)
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-prompt = "continue"
+personas = [
+    {"name": "Professor", "prompt": "You are a professor. Explain concepts formally and in depth."},
+    {"name": "Kids teacher", "prompt": "You are explaining to a 10 year old. Use simple words and a fun analogy."},
+    {"name": "JSON only", "prompt": "Respond in JSON only. Fields: summary, example, difficulty_level."},
+]
 
-history = []
+prompt = input("Enter a topic: ")
 
-while prompt != "quit" :
-    prompt = input("enter prompt. to stop type 'quit' : ")
-
+for persona in personas:
     response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
-    messages=[
-        {"role": "user", "content": f"{prompt}"},*history
-    ],
-    temperature=1,
-    max_tokens=512,
-    )   
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": persona["prompt"]},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        max_tokens=512,
+    )
 
-    history.append({"role": "user", "content": f"{prompt}"})
-    history.append({"role": "assistant", "content": f"{response.choices[0].message.content}"})
-
+    print(f"\n===== {persona['name']} =====")
     print(response.choices[0].message.content)

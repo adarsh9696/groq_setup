@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer, util
 import torch
 
+"""
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 sentences = [
@@ -27,3 +28,12 @@ top_results = torch.topk(scores[0], k=3)
 for rank, (score, idx) in enumerate(zip(top_results.values, top_results.indices)):
     print(f"#{rank+1}: {sentences[idx]}")
     print(f"Score: {score:.4f}\n")
+
+"""
+
+file = open('C:/Users/adars/Documents/ai_module/sample_text.txt')
+content = file.read()
+file.close()
+
+new = content.split("\n\n")
+print(new)

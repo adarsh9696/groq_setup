@@ -1,6 +1,8 @@
 from sentence_transformers import SentenceTransformer, util
 import torch
+import json
 
+"""
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 sentences = [
@@ -32,3 +34,18 @@ if top_results.values[0] < 0.5 :
     print("comparison working")
 else : 
     print("not working")
+"""
+
+test = """```json
+{
+    "answer": "the actual answer here",
+    "confidence": "high/medium/low",
+    "key_points": ["point 1", "point 2", "point 3"],
+    "related_topics": ["topic 1", "topic 2"]
+}
+```"""
+
+# find the first { and last } and slice everything between them
+test = test[test.index("{"):test.rindex("}")+1]
+parsed = json.loads(test)
+print(parsed)

@@ -4,6 +4,7 @@ from groq import Groq
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer, util
 import torch
+import json
 
 load_dotenv()
 
@@ -33,15 +34,24 @@ chunk_embeddings = model.encode(updated_chunks)
 
 prompt = 'start'
 
-filled_template = """You are a document assistant. You have ONE job: answer questions using ONLY the document below.
+filled_template = """You are a document assistant. You have ONE job: answer questions using ONLY the document below. Moreover, you STRICTLY answer in a JSON format that you are provided with in this system prompt.
 
-STRICT RULES:
+STRICT RULES :
 - If the answer is in the document, answer it using only that information.
 - If the answer is NOT in the document, respond with exactly: "I cannot answer this based on the provided document."
 - Never use your training knowledge. Never answer from memory.
 - No exceptions.
 - Always provide a complete, detailed answer using all relevant information from the document.
 - Do not give one-sentence answers when more relevant information is available.
+
+STRICT FORMAT TO FOLLOW : 
+{
+    "answer": "the actual answer here",
+    "confidence": "high/medium/low",
+    "key_points": ["point 1", "point 2", "point 3"],
+    "related_topics": ["topic 1", "topic 2"]
+}
+
 
 DOCUMENT:
 """
@@ -96,16 +106,29 @@ while prompt != "quit":
         temperature=0.7,
         max_tokens=512,
     )
+    test = response.choices[0].message.content
+    test = test[test.index("{"):test.rindex("}")+1]
+    parsed = json.loads(test)
 
     history.append({"role": "user", "content": prompt})
     history.append({"role": "assistant", "content": response.choices[0].message.content})
 
+    """
     print("response is based on these top-3 retrieved sentences : ")
     for rank, (score, idx) in enumerate(zip(retrieval_result.values, retrieval_result.indices)):
         print(f"#{rank+1}: {updated_chunks[idx]}")
         print(f"Score: {score:.4f}\n")
 
-    print("Response : ")
+    """
 
-    print(response.choices[0].message.content)
+    print("Answer : \n"+ parsed["answer"]+"\n")
+    print("Confidence : \n"+ parsed["confidence"]+"\n")
+
+    print("Key points : \n")
+    for keys in parsed["key_points"] : 
+        print(" -"+keys)
+    
+    print("Related topics : \n")
+    for topics in parsed["related_topics"] : 
+        print(" -"+topics)
     time.sleep(2)

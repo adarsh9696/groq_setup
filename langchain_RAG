@@ -1,5 +1,6 @@
 import os
 from langchain_groq import ChatGroq
+from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -9,6 +10,7 @@ from langchain.chains import ConversationalRetrievalChain
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
@@ -36,8 +38,25 @@ else :
     vectorstore.save_local("faiss_index")
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=retriever,memory=memory)
 
+custom_prompt = PromptTemplate(
+    template="""You are a document assistant. Answer ONLY from the context below.
+If the answer is not in the context, say "I cannot answer this based on the provided document."
+
+Context: {context}
+Chat History: {chat_history}
+Question: {question}
+
+Answer:""",
+    input_variables=["context", "chat_history", "question"]
+)
+
+qa_chain = ConversationalRetrievalChain.from_llm(
+    llm=llm,
+    retriever=retriever,
+    memory=memory,
+    combine_docs_chain_kwargs={"prompt": custom_prompt}
+)
 
 while True:
     user_input = input("You: ")

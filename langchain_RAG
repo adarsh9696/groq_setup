@@ -3,7 +3,7 @@ from langchain_groq import ChatGroq
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains import ConversationalRetrievalChain
 from dotenv import load_dotenv
@@ -28,10 +28,12 @@ splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 chunks = splitter.split_documents(documents)
 
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma(
-    persist_directory="./chroma_db", 
-    embedding_function=embeddings
-)
+
+if os.path.exists ("FAISS_index") : 
+    vectorstore = FAISS.load_local("faiss_index",embeddings, allow_dangerous_deserialization=True)
+else : 
+    vectorstore = FAISS.from_documents(chunks,embeddings)
+    vectorstore.save_local("faiss_index")
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=retriever,memory=memory)

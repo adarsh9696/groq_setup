@@ -27,7 +27,7 @@ if "chain" not in st.session_state :
     return_messages=True
     )
 
-    loader = TextLoader("C:/Users/adars/Documents/ai_module/sample_text.txt")
+    loader = TextLoader("sample_text.txt") #C:/Users/adars/Documents/ai_module/sample_text.txt
     documents = loader.load()
 
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)

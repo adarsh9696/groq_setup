@@ -11,7 +11,7 @@ load_dotenv()
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-with open('C:/Users/adars/Documents/ai_module/sample_text.txt') as file:
+with open('sample_text.txt') as file: #C:/Users/adars/Documents/ai_module/sample_text.txt
     content = file.read()
 
 chunks = []

@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         return_messages=True
     )
 
-    loader = TextLoader("C:/Users/adars/Documents/ai_module/sample_text.txt")
+    loader = TextLoader("sample_text.txt") #C:/Users/adars/Documents/ai_module/sample_text.txt
     documents = loader.load()
 
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -75,7 +75,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.post("/agent")
+@app.post("/ask")
 def read_item(query: Question, request: Request) :
     response = request.app.state.chain.invoke({"question" :query.question})
     return {"answer": response["answer"]}

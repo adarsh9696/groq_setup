@@ -10,6 +10,12 @@ Ask questions in natural language and get answers retrieved from your own docume
 - Sends only the relevant chunks to Llama 3.3 70b via Groq API
 - Filters out irrelevant results using a similarity threshold
 
+## Live Demo
+
+Built a RAG pipeline with LangChain + FAISS, exposed via FastAPI, containerized with Docker, and deployed on Railway.
+
+**Live API:** [https://groqsetup-production.up.railway.app/docs](https://groqsetup-production.up.railway.app/docs)
+
 ## Setup
 ```bash
 pip install groq sentence-transformers torch python-dotenv
